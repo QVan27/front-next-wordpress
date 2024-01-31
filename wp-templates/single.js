@@ -17,6 +17,11 @@ export default function Component(props) {
     return <>Loading...</>;
   }
 
+  const logo = {
+    src: props?.data?.header?.optionsHeader?.logo.node.sourceUrl ?? '',
+    alt: props?.data?.header?.optionsHeader?.logo.node.altText ?? '',
+  };
+
   const { title: siteTitle, metaDesc: siteDescription } =
     props?.data?.post?.seo ?? {};
   const fullHead = parse(props?.data?.post?.seo.fullHead);
@@ -29,6 +34,8 @@ export default function Component(props) {
     <>
       <Head>{fullHead}</Head>
       <Header
+        logo={logo.src}
+        altText={logo.alt}
         title={siteTitle}
         description={siteDescription}
         menuItems={primaryMenu}
@@ -80,6 +87,17 @@ Component.query = gql`
         id: clientId
         parentId: parentClientId
         ...${blocks.AcfBanner.fragments.key}
+      }
+    }
+    header {
+      optionsHeader {
+        logo {
+          node {
+            altText
+            id
+            sourceUrl
+          }
+        }
       }
     }
     footerMenuItems: menuItems(where: { location: $footerLocation }) {
