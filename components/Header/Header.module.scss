@@ -2,16 +2,18 @@
 
 .component {
 	color: var(--wpe--header--color);
-	background-color: var(--wpe--header--background-color);
-	position: relative;
+	position: fixed;
+	width: 100%;
+	top: 0;
 	z-index: 2; // Pull dropdown menus to the foreground to sit above <Main />.
+	// background-color: var(--wpe--header--background-color);
 }
 
 .navbar {
 	display: flex;
 	justify-content: space-between;
 	flex-wrap: wrap;
-	padding: 3rem 0;
+	padding: 1rem 0;
 	gap: 1rem;
 }
 
@@ -36,21 +38,21 @@
 .nav-toggle {
 	align-items: center;
 	background-color: transparent;
-	border: 0.1rem solid var(--wpe--color--white);
-	color: var(--wpe--color--black);
+	// border: 0.1rem solid var(--wpe--color--white);
+	color: var(--wpe--color--white);
 	cursor: pointer;
 	display: flex;
 	margin: 0;
-	padding: 0.5rem 1rem;
+	// padding: 0.5rem 1rem;
 	transition: all 0.2s ease-in;
 	user-select: none;
 	font-size: 2rem;
 
-	&:hover,
-	&:focus {
-		background-color: var(--wpe--color--white);
-		color: var(--wpe--color--black);
-	}
+	// &:hover,
+	// &:focus {
+	// 	background-color: var(--wpe--color--white);
+	// 	color: var(--wpe--color--black);
+	// }
 
 	@media (min-width: $breakpoint-small) {
 		display: none !important;

@@ -18,6 +18,13 @@ export default function Component({ data }) {
     return <>Loading...</>;
   }
 
+  const logo = {
+    src: data?.header?.optionsHeader?.logo.node.sourceUrl ?? '',
+    alt: data?.header?.optionsHeader?.logo.node.altText ?? '',
+  };
+
+
+  // const logo = data?.header?.optionsHeader?.logo.node.sourceUrl ?? '';
   const { title: siteTitle, metaDesc: siteDescription } = data?.page?.seo ?? {};
   const fullHead = parse(data?.page?.seo.fullHead);
   const primaryMenu = data?.headerMenuItems?.nodes ?? [];
@@ -29,6 +36,8 @@ export default function Component({ data }) {
     <>
       <Head>{fullHead}</Head>
       <Header
+        logo={logo.src}
+        altText={logo.alt}
         title={siteTitle}
         description={siteDescription}
         menuItems={primaryMenu}
@@ -54,6 +63,17 @@ Component.query = gql`
     headerMenuItems: menuItems(where: { location: $headerLocation }) {
       nodes {
         ...NavigationMenuItemFragment
+      }
+    }
+    header {
+      optionsHeader {
+        logo {
+          node {
+            altText
+            id
+            sourceUrl
+          }
+        }
       }
     }
     footerMenuItems: menuItems(where: { location: $footerLocation }) {

@@ -20,6 +20,11 @@ export default function Component(props) {
     return <>Loading...</>;
   }
 
+  const logo = {
+    src: props?.data?.header?.optionsHeader?.logo.node.sourceUrl ?? '',
+    alt: props?.data?.header?.optionsHeader?.logo.node.altText ?? '',
+  };
+
   const { title: siteTitle, metaDesc: siteDescription } =
     props?.data?.page?.seo ?? {};
   const primaryMenu = props?.data?.headerMenuItems?.nodes ?? [];
@@ -35,6 +40,8 @@ export default function Component(props) {
         imageUrl={featuredImage?.node?.sourceUrl}
       />
       <Header
+      logo={logo.src}
+      altText={logo.alt}
         title={siteTitle}
         description={siteDescription}
         menuItems={primaryMenu}
@@ -82,6 +89,17 @@ Component.query = gql`
         ...${blocks.AcfBanner.fragments.key}
       }
       ...FeaturedImageFragment
+    }
+    header {
+      optionsHeader {
+        logo {
+          node {
+            altText
+            id
+            sourceUrl
+          }
+        }
+      }
     }
     footerMenuItems: menuItems(where: { location: $footerLocation }) {
       nodes {
