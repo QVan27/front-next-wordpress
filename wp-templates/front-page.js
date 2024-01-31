@@ -1,42 +1,41 @@
-import { useQuery, gql } from '@apollo/client';
+import { gql } from '@apollo/client';
 import * as MENUS from '../constants/menus';
-import { BlogInfoFragment } from '../fragments/GeneralSettings';
 import {
   Header,
   Footer,
   Main,
-  Container,
   NavigationMenu,
-  Hero,
-  SEO,
 } from '../components';
+import { flatListToHierarchical } from '@faustwp/core';
+import { WordPressBlocksViewer } from '@faustwp/blocks';
+import blocks from '../wp-blocks';
+import Grid from '@utils/Grid.js';
+import parse from 'html-react-parser';
+import Head from 'next/head';
 
-export default function Component() {
-  const { data } = useQuery(Component.query, {
-    variables: Component.variables(),
-  });
+export default function Component({ data }) {
+  if (data.loading) {
+    return <>Loading...</>;
+  }
 
-  const { title: siteTitle, description: siteDescription } =
-    data?.generalSettings;
+  const { title: siteTitle, metaDesc: siteDescription } = data?.page?.seo ?? {};
+  const fullHead = parse(data?.page?.seo.fullHead);
   const primaryMenu = data?.headerMenuItems?.nodes ?? [];
   const footerMenu = data?.footerMenuItems?.nodes ?? [];
+  const { editorBlocks } = data?.page;
+  const blockList = flatListToHierarchical(editorBlocks, { childrenKey: 'innerBlocks' });
 
   return (
     <>
-      <SEO title={siteTitle} description={siteDescription} />
+      <Head>{fullHead}</Head>
       <Header
         title={siteTitle}
         description={siteDescription}
         menuItems={primaryMenu}
       />
+      <Grid />
       <Main>
-        <Container>
-          <Hero title={'Front Page'} />
-          <div className="text-center">
-            <p>This page is utilizing the "front-page" WordPress template.</p>
-            <code>wp-templates/front-page.js</code>
-          </div>
-        </Container>
+        <WordPressBlocksViewer blocks={blockList} />
       </Main>
       <Footer title={siteTitle} menuItems={footerMenu} />
     </>
@@ -44,15 +43,14 @@ export default function Component() {
 }
 
 Component.query = gql`
-  ${BlogInfoFragment}
   ${NavigationMenu.fragments.entry}
-  query GetPageData(
+  ${blocks.AcfBanner.fragments.entry}
+  query GetPage(
     $headerLocation: MenuLocationEnum
     $footerLocation: MenuLocationEnum
+    $databaseId: ID!
+    $asPreview: Boolean = false
   ) {
-    generalSettings {
-      ...BlogInfoFragment
-    }
     headerMenuItems: menuItems(where: { location: $headerLocation }) {
       nodes {
         ...NavigationMenuItemFragment
@@ -63,12 +61,29 @@ Component.query = gql`
         ...NavigationMenuItemFragment
       }
     }
+    page(id: $databaseId, idType: DATABASE_ID, asPreview: $asPreview) {
+      seo {
+        metaDesc
+        title
+        fullHead
+      }
+      editorBlocks(flat: false) {
+        name
+        __typename
+        renderedHtml
+        id: clientId
+        parentId: parentClientId
+        ...${blocks.AcfBanner.fragments.key}
+      }
+    }
   }
 `;
 
-Component.variables = () => {
+Component.variables = ({ databaseId }, ctx) => {
   return {
     headerLocation: MENUS.PRIMARY_LOCATION,
     footerLocation: MENUS.FOOTER_LOCATION,
+    databaseId,
+    asPreview: ctx?.asPreview,
   };
 };

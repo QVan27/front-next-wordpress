@@ -1,17 +1,18 @@
 import { gql } from '@apollo/client';
 import * as MENUS from '../constants/menus';
-import { BlogInfoFragment } from '../fragments/GeneralSettings';
+// import { BlogInfoFragment } from '../fragments/GeneralSettings';
 import {
   Header,
   Footer,
   Main,
-  Container,
-  ContentWrapper,
-  EntryHeader,
   NavigationMenu,
   FeaturedImage,
   SEO,
 } from '../components';
+
+import { flatListToHierarchical } from '@faustwp/core';
+import { WordPressBlocksViewer } from '@faustwp/blocks';
+import blocks from '../wp-blocks';
 
 export default function Component(props) {
   // Loading state for previews
@@ -19,11 +20,12 @@ export default function Component(props) {
     return <>Loading...</>;
   }
 
-  const { title: siteTitle, description: siteDescription } =
-    props?.data?.generalSettings;
+  const { title: siteTitle, metaDesc: siteDescription } =
+    props?.data?.page?.seo ?? {};
   const primaryMenu = props?.data?.headerMenuItems?.nodes ?? [];
   const footerMenu = props?.data?.footerMenuItems?.nodes ?? [];
-  const { title, content, featuredImage } = props?.data?.page ?? { title: '' };
+  const { featuredImage, editorBlocks } = props?.data?.page ?? { title: '' };
+  const blockList = flatListToHierarchical(editorBlocks, { childrenKey: 'innerBlocks' });
 
   return (
     <>
@@ -38,12 +40,7 @@ export default function Component(props) {
         menuItems={primaryMenu}
       />
       <Main>
-        <>
-          <EntryHeader title={title} image={featuredImage?.node} />
-          <Container>
-            <ContentWrapper content={content} />
-          </Container>
-        </>
+        <WordPressBlocksViewer blocks={blockList} />
       </Main>
       <Footer title={siteTitle} menuItems={footerMenu} />
     </>
@@ -60,9 +57,9 @@ Component.variables = ({ databaseId }, ctx) => {
 };
 
 Component.query = gql`
-  ${BlogInfoFragment}
   ${NavigationMenu.fragments.entry}
   ${FeaturedImage.fragments.entry}
+  ${blocks.AcfBanner.fragments.entry}
   query GetPageData(
     $databaseId: ID!
     $headerLocation: MenuLocationEnum
@@ -72,10 +69,19 @@ Component.query = gql`
     page(id: $databaseId, idType: DATABASE_ID, asPreview: $asPreview) {
       title
       content
+      seo {
+        metaDesc
+        title
+      }
+      editorBlocks(flat: false) {
+        name
+        __typename
+        renderedHtml
+        id: clientId
+        parentId: parentClientId
+        ...${blocks.AcfBanner.fragments.key}
+      }
       ...FeaturedImageFragment
-    }
-    generalSettings {
-      ...BlogInfoFragment
     }
     footerMenuItems: menuItems(where: { location: $footerLocation }) {
       nodes {
