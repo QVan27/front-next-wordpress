@@ -40,8 +40,8 @@ export default function Component(props) {
         imageUrl={featuredImage?.node?.sourceUrl}
       />
       <Header
-      logo={logo.src}
-      altText={logo.alt}
+        logo={logo.src}
+        altText={logo.alt}
         title={siteTitle}
         description={siteDescription}
         menuItems={primaryMenu}

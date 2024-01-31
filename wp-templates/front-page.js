@@ -9,7 +9,6 @@ import {
 import { flatListToHierarchical } from '@faustwp/core';
 import { WordPressBlocksViewer } from '@faustwp/blocks';
 import blocks from '../wp-blocks';
-import Grid from '@utils/Grid.js';
 import parse from 'html-react-parser';
 import Head from 'next/head';
 
@@ -23,8 +22,6 @@ export default function Component({ data }) {
     alt: data?.header?.optionsHeader?.logo.node.altText ?? '',
   };
 
-
-  // const logo = data?.header?.optionsHeader?.logo.node.sourceUrl ?? '';
   const { title: siteTitle, metaDesc: siteDescription } = data?.page?.seo ?? {};
   const fullHead = parse(data?.page?.seo.fullHead);
   const primaryMenu = data?.headerMenuItems?.nodes ?? [];
@@ -42,7 +39,6 @@ export default function Component({ data }) {
         description={siteDescription}
         menuItems={primaryMenu}
       />
-      <Grid />
       <Main>
         <WordPressBlocksViewer blocks={blockList} />
       </Main>
